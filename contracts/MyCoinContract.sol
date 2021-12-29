@@ -16,8 +16,7 @@ contract MyCoinContract {
   constructor() {
     name = "MyCoin";
     symbol = "MC";
-    decimals = 18;
-    totalSupply = 1000000 * (uint256(10) ** decimals);
+    totalSupply = 1000;
     balanceOf[msg.sender] = totalSupply;
   }
 
