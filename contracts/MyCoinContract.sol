@@ -7,8 +7,11 @@ contract MyCoinContract {
   string public symbol;
   uint8 public decimals;
   uint256 public totalSupply;
+  uint256 dividendPerToken;
   mapping(address => uint256) public balanceOf;
   mapping(address => mapping(address => uint256)) public allowance;
+  mapping(address => uint256) dividendBalanceOf;
+  mapping(address => uint256) dividendCreditedTo;
   
   event Transfer(address indexed _from, address indexed _to, uint256 _value);
   event Approval(address indexed _owner, address _spender, uint256 _value);
@@ -22,6 +25,8 @@ contract MyCoinContract {
 
   function transfer(address _to, uint256 _value) public returns (bool success) {
     require(balanceOf[msg.sender] >= _value);
+    update(msg.sender);
+    update(_to);
     balanceOf[msg.sender] -= _value;
     balanceOf[_to] += _value;
     emit Transfer(msg.sender, _to, _value);
@@ -42,6 +47,23 @@ contract MyCoinContract {
     allowance[_from][msg.sender] -= _value;
     emit Transfer(_from, _to, _value);
     return true;
+  }
+
+  function update(address _address) internal {
+    uint256 debit = dividendPerToken - dividendCreditedTo[_address];
+    dividendBalanceOf[_address] += balanceOf[_address] * debit;
+    dividendCreditedTo[_address] = dividendPerToken;
+  }
+
+  function withdraw() public {
+    update(msg.sender);
+    uint256 amount = dividendBalanceOf[msg.sender];
+    dividendBalanceOf[msg.sender] = 0;
+    payable(msg.sender).transfer(amount);
+  }
+
+  function deposit() public payable {
+    dividendPerToken += msg.value / totalSupply;
   }
 
 }
