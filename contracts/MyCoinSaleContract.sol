@@ -43,7 +43,7 @@ contract MyCoinSaleContract {
   function endSold() public {
     require(msg.sender == owner);
     require(myCoinInterface.transfer(owner, myCoinInterface.balanceOf(address(this))));
-    payable(msg.sender).transfer(address(this).balance);
+    payable(owner).transfer(address(this).balance);
   }
 
 }
